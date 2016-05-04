@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Raffle</title>
+  <link rel="stylesheet" href="css/reset.css" media="screen">
+  <link rel="stylesheet" href="css/raffle.css" media="screen">
+  <style type="text/css">
+  body {
+    background-image: url('img/master-slide.png');
+  }
+  </style>
+</head>
+  <body>
+    <header>
+      <h1>BGPHP 2015 Raffle</h1>
+    </header>
+    
+
+    
+    <section id='chooser'>
+        <h1>And the winner is...</h1>
+        <button id='chooseit'><span>DRAW</span></button>
+    </section>
+    
+    <section id='winners'>
+       <h1>Winners so far:</h1>
+       <ol></ol>
+    </section>
+    
+    <!-- Grab Google CDN's jQuery. fall back to local if necessary -->
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.js"></script>
+    <script>!window.jQuery && document.write(unescape('%3Cscript src="js/jquery-1.4.4.js"%3E%3C/script%3E'))</script>
+    <script src="js/raffle.js"></script>
+  </body>
+</html>
+

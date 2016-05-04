@@ -1,0 +1,127 @@
+html {
+  height: 100%;
+  #background: #000;
+  #background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#222), color-stop(70%,#000000)) no-repeat; /* webkit */
+}
+
+body {
+  width: 1024px;
+  margin: 35px auto;
+  color: #fff;
+}
+
+header {
+  color: #eee;
+  font-size: 54px;
+  margin: 20px 0;
+  line-height: 1.5em;
+  text-align: center;
+  text-transform: uppercase;
+  display:block;
+  position: relative;
+  overflow: hidden;
+}
+
+header h1 {
+  text-shadow: #000 2px 2px 0;
+  padding: 0;
+  display: inline-block; 
+  position: relative;
+}
+header h1:after{
+  width: 100%; 
+  height: 5px;
+  background: #fff;
+  display: block;
+  content: '';
+  position: absolute; 
+  top: 45%;
+  right: -105%;
+}
+header h1:before{
+  width: 100%; 
+  height: 5px;
+  background: #fff;
+  display: block;
+  content: '';
+  position: absolute; 
+  top: 45%;
+  left: -105%;
+}
+
+header h1 em {
+  color: #999;
+  font-weight: normal;
+  font-family: Georgia;
+  font-size: .50em;
+  text-shadow: #000 1px 1px 0;
+}
+
+#winners {
+  font-size: 28px;
+  float: none;
+  width: 100%;
+  text-align:center;
+  padding: 50px 0 0;
+}
+
+#winners ol {
+  margin-top: 1em;
+  color: #fff;
+}
+
+#winners ol li {
+  line-height: 1.75em;
+  float: left;
+  font-size: 22px;
+  line-height: 1.75em;
+  list-style-position: inside;
+  padding: 0 3% 0 0;
+  text-align: left;
+  width: 30%;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+#winners h1{
+  color: #4CB7B0;
+  font-size: 36px;
+}
+
+#chooser {
+  margin-top: 40px;
+  font-size: 3.5em;
+  width: 80%;
+  text-align: center;
+  padding: 50px 10%;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+#chooser h1 {
+  margin-bottom: 30px;
+}
+
+button#chooseit {
+    text-transform: uppercase;
+    display: inline-block;
+    height: 70px;
+    line-height: 70px;
+    border-radius: 2px;
+    font-size: 26px;
+    color: #fff;
+    font-weight: 600;
+    padding: 0 40px;
+    -webkit-box-shadow: 0 0 8px 0 rgba(0,0,0,0.2);
+    box-shadow: 0 0 8px 0 rgba(0,0,0,0.2);
+  background: #da6868;
+  outline: none;
+  border: none;
+
+}
+
+button#chooseit:hover {
+  background: #b93f3e;
+  color: #fff;
+
+}
