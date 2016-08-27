@@ -10,21 +10,12 @@ require_once "CsvWriter.php";
 
 class Raffler
 {
-    // TODO: Make this not depend on session, just read the winners file on init, load into private variable
-    const SESSION_KEY            = 'raffler_winners';
-
     private $attendees      = [];
     private $winners        = [];
     private $noshows        = [];
     private $awards         = [];
     private $allDrawn       = [];
-    private $csvHeadConfig  = [
-        'id'            => 'Registration ID',
-        'email'            => 'Email',
-        'name'            => 'Name',
-        'first_name'    => null,
-        'last_name'        => null,
-    ];
+    private $csvHeadConfig  = [];
 
     private $attendeesFilename;
     private $awardsFileName;
@@ -37,6 +28,15 @@ class Raffler
         $this->awardsFilename       = isset($options['awardsFilename']) ? $options['awardsFilename'] : 'awards.csv';
         $this->winnersFilename      = isset($options['winnersFilename']) ? $options['winnersFilename'] : 'winners.csv';
         $this->nowshowFilename      = isset($options['noshowFilename']) ? $options['noshowFilename'] : 'noshow.csv';
+        $this->csvHeadConfig        = isset($options['csvHead'])
+            ? $options['csvHead']
+            : [
+                'id'            => 'Registration ID',
+                'email'         => 'Email',
+                'name'          => 'Name',
+                'first_name'    => null,
+                'last_name'     => null,
+            ];
     }
 
     public function init()
@@ -64,6 +64,20 @@ class Raffler
         }
 
         throw new Exception("File ({$filename}) could not be processed!");
+    }
+
+    public function getPrimaryKey($line)
+    {
+        if (isset($this->csvHeadConfig['id']) && isset($line[$this->csvHeadConfig['id']])) {
+            return $line[$this->csvHeadConfig['id']];
+        }
+
+        if (isset($this->csvHeadConfig['email']) && isset($line[$this->csvHeadConfig['email']])) {
+            return $line[$this->csvHeadConfig['email']];
+        }
+
+        // Otherwise calculate a hash based on the whole line's content
+        return md5(implode($line));
     }
 
     private function loadWinners()
