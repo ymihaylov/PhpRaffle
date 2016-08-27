@@ -3,10 +3,12 @@ namespace PhpRaffle;
 
 // use PhpRaffle\CsvReader;
 // use PhpRaffle\CsvWriter;
+// use PhpRaffle\AllDrawnException;
 
 // TODO: Replace this with a nice PSR-4 style autoloading!!!
 require_once "CsvReader.php";
 require_once "CsvWriter.php";
+require_once "AllDrawnException.php";
 
 class Raffler
 {
@@ -47,15 +49,15 @@ class Raffler
         $this->loadAwards();
     }
 
-    private function readCsvFileToArray($filename, $head = null)
+    private function readCsvFileToArray($filename)
     {
         if (!is_readable($filename)) {
             throw new Exception("File ({$filename}) not readible!");
         }
 
         $csvReader    = new CsvReader($filename);
-        if (isset($head)) {
-            $csvReader->setHead($head);
+        if (! empty($this->csvHeadConfig)) {
+            $csvReader->setHead($this->csvHeadConfig);
         }
 
         if ($csvReader->openFile()) {
@@ -82,17 +84,27 @@ class Raffler
 
     private function loadWinners()
     {
-        $this->winners = $this->readCsvFileToArray($this->winnersFilename, $this->csvHeadConfig);
+        $this->winners = $this->readCsvFileToArray($this->winnersFilename);
+
+        // Add all the drawn winners to the allDrawn array
+        foreach ($this->winners as $line) {
+            $this->allDrawn[ $this->getPrimaryKey($line) ] = $line;
+        }
     }
 
     private function loadNoShow()
     {
-        $this->noshows = $this->readCsvFileToArray($this->noshowFilename, $this->csvHeadConfig);
+        $this->noshows = $this->readCsvFileToArray($this->noshowFilename);
+
+        // Add all the no-shows to the allDrawn array
+        foreach ($this->noshows as $line) {
+            $this->allDrawn[ $this->getPrimaryKey($line) ] = $line;
+        }
     }
 
     private function loadAttendees()
     {
-        $this->attendees = $this->readCsvFileToArray($this->attendeesFilename, $this->csvHeadConfig);
+        $this->attendees = $this->readCsvFileToArray($this->attendeesFilename);
     }
 
     private function loadAwards()
@@ -103,5 +115,19 @@ class Raffler
         $awardsArr = array_slice($awardsArr, count($this->winners));
 
         $this->awards = $awardsArr;
+    }
+
+    public function draw()
+    {
+        if (count($this->allDrawn) >= count($this->attendees)) {
+            throw new AllDrawnException("Everybody has been drawn");
+        }
+
+        do {
+            $drawn = array_rand($this->attendees);
+            $key = $this->getPrimaryKey($drawn);
+        } while (isset($this->allDrawn[$key]));
+
+        return $drawn;
     }
 }
