@@ -1,5 +1,6 @@
 <?php
 namespace PhpJsRaffler;
+
 // use PhpJsRaffler\CsvReader;
 // use PhpJsRaffler\CsvWriter;
 
@@ -8,95 +9,84 @@ namespace PhpJsRaffler;
 
 class Raffler
 {
-	// TODO: Make this not depend on session, just read the winners file on init, load into private variable
-	const SESSION_KEY			= 'raffler_winners';
+    // TODO: Make this not depend on session, just read the winners file on init, load into private variable
+    const SESSION_KEY            = 'raffler_winners';
 
-	private $_attendees 		= [];
-	private $_winners 			= [];
-	private $_awards 			= [];
-	private $_allDrawn 			= [];
-	private $_csvHeadConfig 	= [
-		'id'			=> 'Registration ID',
-		'email'			=> 'Email',
-		'name'			=> 'Name',
-		'first_name'	=> null,
-		'last_name'		=> null,
-	];
-	private $_inputFileName;
-	private $_awardsFileName;
-	private $_winnersFileName;
-	private $_noshowFileName;
-	
-	public function __construct( $options )
-	{
-		$this->_inputFilename = isset( $options['inputFilename'] ) ? $options['inputFilename'] : 'attendees.csv'; 
-		$this->_awardsFilename = isset( $options['awardsFilename'] ) ? $options['awardsFilename'] : 'awards.csv'; 
-		$this->_winnersFilename = isset( $options['winnersFilename'] ) ? $options['winnersFilename'] : 'winners.csv'; 
-		$this->_nowshowFilename = isset( $options['noshowFilename'] ) ? $options['noshowFilename'] : 'noshow.csv'; 
-	}
+    private $attendees      = [];
+    private $winners        = [];
+    private $noshows        = [];
+    private $awards         = [];
+    private $allDrawn       = [];
+    private $csvHeadConfig  = [
+        'id'            => 'Registration ID',
+        'email'            => 'Email',
+        'name'            => 'Name',
+        'first_name'    => null,
+        'last_name'        => null,
+    ];
 
-	public function setInputFilename( $filename )
-	{
-		$this->_inputFileName = $filename;
-	}
+    private $attendeesFilename;
+    private $awardsFileName;
+    private $winnersFileName;
+    private $noshowFileName;
 
-	public function setAwardsFilename( $filename )
-	{
-		$this->_awardsFileName = $filename;
-	}
+    public function __construct($options)
+    {
+        $this->attendeesFilename    = isset($options['attendeesFilename']) ? $options['attendeesFilename'] : 'attendees.csv';
+        $this->awardsFilename       = isset($options['awardsFilename']) ? $options['awardsFilename'] : 'awards.csv';
+        $this->winnersFilename      = isset($options['winnersFilename']) ? $options['winnersFilename'] : 'winners.csv';
+        $this->nowshowFilename      = isset($options['noshowFilename']) ? $options['noshowFilename'] : 'noshow.csv';
+    }
 
-	public function setWinnersFilename( $filename )
-	{
-		$this->_awardsFileName = $filename;
-	}
+    public function init()
+    {
+        $this->loadWinners();
+        $this->loadNoShow();
+        $this->loadAttendees();
+        $this->loadAwards();
+    }
 
-	public function setNoshowFilename( $filename )
-	{
-		$this->_nowshowFileName = $filename;
-	}
+    private function readCsvFileToArray($filename, $head = null)
+    {
+        if (!is_readable($filename)) {
+            throw new Exception("File ({$filename}) not readible!");
+        }
 
-	public function init()
-	{
-		$this->_loadWinners();
-		$this->_loadNoShow();
-		$this->_loadAwards();
-	}
+        $csvReader    = new CsvReader($filename);
+        if (isset($head)) {
+            $csvReader->setHead($head);
+        }
 
-	private function readCsvFileToArray( $filename, $head = null )
-	{
-		if ( !is_readable( $filename ) )
-		{
-			throw new Exception( "File ({$filename}) not readible!" );
-		}
+        if ($csvReader->openFile()) {
+            $arr = $csvReader->readToArray();
+            return $arr;
+        }
 
-		$csvReader 	= new CsvReader( $filename );
-		if ( isset( $head ) )
-			$csvReader->setHead( $head );
-		
-		if ( $csvReader->openFile() )
-		{	
-			$arr = $csvReader->readToArray();
-			$csvReader->closeFile();
-			return $arr;
-		}
+        throw new Exception("File ({$filename}) could not be processed!");
+    }
 
-		throw new Exception( "File ({$filename}) could not be processed!" );
-	}
+    private function loadWinners()
+    {
+        $this->winners = $this->readCsvFileToArray($this->winnersFilename, $this->csvHeadConfig);
+    }
 
-	private function _loadWinners()
-	{
-		$this->_winners = $this->_readCsvFileToArray( $this->_winnersFilename );
-	}
+    private function loadNoShow()
+    {
+        $this->noshows = $this->readCsvFileToArray($this->noshowFilename, $this->csvHeadConfig);
+    }
 
-	private function _loadAwards()
-	{
-		$awardsArr = $this->_readCsvFileToArray( $this->_awardsFilename );
+    private function loadAttendees()
+    {
+        $this->attendees = $this->readCsvFileToArray($this->attendeesFilename, $this->csvHeadConfig);
+    }
 
-		// Load just the remaining not drawn awards
-		$awardsArr = array_slice( $awardsArr, count( $this->_winners ) );
-		
-		$this->_awards = $awardsArr;
-	}
+    private function loadAwards()
+    {
+        $awardsArr = $this->readCsvFileToArray($this->awardsFilename);
+
+        // Load just the remaining not drawn awards
+        $awardsArr = array_slice($awardsArr, count($this->winners));
+
+        $this->awards = $awardsArr;
+    }
 }
-
-

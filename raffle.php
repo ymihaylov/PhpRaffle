@@ -84,7 +84,7 @@ function loadAttendees( $inputFile, &$attendeesEmails )
 	$csvReader->enclosure = '"';
 
 	if ( $csvReader->openFile() )
-	{	
+	{
 		$head = $csvReader->readLine();
 		$csvReader->setHead( $head );
 		while( $line = $csvReader->readLine() )
@@ -106,13 +106,11 @@ function loadAwards( $inputFile, $winners )
 	$csvReader 	= new CsvReader( $inputFile );
 
 	if ( $csvReader->openFile() )
-	{	
+	{
 		$awardsArr = $csvReader->readToArray();
 		$awardsArr = array_slice( $awardsArr, count( $winners ) );
 		foreach ( $awardsArr as $awardLine )
 			$awards[] = $awardLine[0];
-
-		$csvReader->closeFile();
 	}
 
 	return $awards;
@@ -135,14 +133,14 @@ function drawRandomN( $number, $attendees )
 			if ( !isset( $randomAttendees[ $randomId ] ) )
 				$randomAttendees[ $randomId ] = $attendees[ $randomId ];
 		}
-		while ( count( $randomAttendees ) < $number );		
+		while ( count( $randomAttendees ) < $number );
 	}
 
 	return $randomAttendees;
 }
 
 
-function writeWinner( $winnerId, $winnerName, $winnerEmail, $outputFile, $awards = null, &$awardDec = null )
+function writeWinner( $winnerId, $winnerName, $winnerEmail, $outputFile, $awards = null, &$awardDesc = null )
 {
 	$csvWriter = new CsvWriter( $outputFile, 'a' );
 	$csvWriter->delimiter = ',';
@@ -153,7 +151,7 @@ function writeWinner( $winnerId, $winnerName, $winnerEmail, $outputFile, $awards
 		$line = array( $winnerId, $winnerName, $winnerEmail );
 		if ( is_array( $awards ) && count( $awards ) )
 		{
-			$awardDec = array_shift( $awards );
+			$awardDesc = array_shift( $awards );
 			$line[] = $awardDesc;
 		}
 
@@ -166,7 +164,7 @@ function writeWinner( $winnerId, $winnerName, $winnerEmail, $outputFile, $awards
 }
 
 function obfuscateEmailAddress( $email )
-{ 
+{
 	$parts = explode( '@', $email );
 	$parts[0] = str_pad( substr( $parts[0], 0, 1 ), strlen( $parts[0] ) - 2, '*' ) . substr( $parts[0], -1 );
 	// $part[1] = preg_replace( '/^.*(\..*)$/', '\1', $email );
