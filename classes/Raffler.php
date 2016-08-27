@@ -1,11 +1,12 @@
 <?php
-namespace PhpJsRaffler;
+namespace PhpRaffle;
 
-// use PhpJsRaffler\CsvReader;
-// use PhpJsRaffler\CsvWriter;
+// use PhpRaffle\CsvReader;
+// use PhpRaffle\CsvWriter;
 
-// require_once "CsvReader.php";
-// require_once "CsvWriter.php";
+// TODO: Replace this with a nice PSR-4 style autoloading!!!
+require_once "CsvReader.php";
+require_once "CsvWriter.php";
 
 class Raffler
 {
