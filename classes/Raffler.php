@@ -20,9 +20,9 @@ class Raffler
     private $csvHeadConfig  = [];
 
     private $attendeesFilename;
-    private $awardsFileName;
-    private $winnersFileName;
-    private $noshowFileName;
+    private $awardsFilename;
+    private $winnersFilename;
+    private $nowshowFilename;
 
     public function __construct($options)
     {
@@ -111,6 +111,12 @@ class Raffler
     {
         $awardsArr = $this->readCsvFileToArray($this->awardsFilename);
 
+        // If there are already as many winners as awards (or more) drawn, set awards to an empty array.
+        if (count($awardsArr) <= count($this->winners)) {
+            $this->awards = [];
+            return;
+        }
+
         // Load just the remaining not drawn awards
         $awardsArr = array_slice($awardsArr, count($this->winners));
 
@@ -121,6 +127,10 @@ class Raffler
     {
         if (count($this->allDrawn) >= count($this->attendees)) {
             throw new AllDrawnException("Everybody has been drawn");
+        }
+
+        if (empty($this->awards)) {
+            throw new NoMoreAwardsException("All awards have been drawn");
         }
 
         do {
