@@ -26,6 +26,9 @@ class Raffler
     private $winnersFilename;
     private $nowshowFilename;
 
+    private $csvReader;
+    private $csvWriter;
+
     public function __construct($options = [])
     {
         $this->attendeesFilename    = isset($options['attendeesFilename']) ? $options['attendeesFilename'] : 'attendees.csv';
@@ -41,6 +44,9 @@ class Raffler
                 'first_name'    => null,
                 'last_name'     => null,
             ];
+
+        $this->csvReader = isset($options['csvReader']) ? $options['csvReader'] : new CsvReader;
+        $this->csvWriter = isset($options['csvWriter']) ? $options['csvWriter'] : new CsvWriter;
     }
 
     public function init()
@@ -49,6 +55,11 @@ class Raffler
         $this->loadNoShow();
         $this->loadAttendees();
         $this->loadAwards();
+    }
+
+    public function getWinners()
+    {
+        return $this->winners;
     }
 
     public function setAttendees($attendees) {
@@ -92,10 +103,7 @@ class Raffler
             throw new Exception("File ({$filename}) not readible!");
         }
 
-        $csvReader    = new CsvReader($filename);
-        if (! empty($this->csvHeadConfig)) {
-            $csvReader->setHead($this->csvHeadConfig);
-        }
+        $csvReader = $this->getCsvReader($filename, $this->csvHeadConfig);
 
         if ($csvReader->openFile()) {
             $arr = $csvReader->readToArray();
@@ -103,6 +111,44 @@ class Raffler
         }
 
         throw new Exception("File ({$filename}) could not be processed!");
+    }
+
+    private function getCsvReader($filename, $head = null)
+    {
+        $csvReaderClass = get_class($this->csvReader);
+        if (! $csvReaderClass) {
+            // TODO: Create a generic base for PhpRaffler exceptions, make NoMore and AllDRawn extend from it
+            throw new Exception('No proper csvReader set');
+        }
+
+        $csvReader = new $csvReaderClass($filename);
+        if (! $csvReader instanceof CsvReaderInterface) {
+            throw new Exception('$csvReaderClass class does not implement CsvReaderInterface');
+        }
+
+        if (! empty($head)) {
+            $csvReader->setHead($head);
+        }
+
+        return $csvReader;
+    }
+
+    private function getCsvWriter($filename, $head = null, $mode = 'w')
+    {
+        $csvWriterClass = get_class($this->csvWriter);
+        if (! $csvWriterClass) {
+            // TODO: Create a generic base for PhpRaffler exceptions, make NoMore and AllDRawn extend from it
+            throw new Exception('No proper csvWriter set');
+        }
+
+        // TODO: Create an interface for csvReader and csvWriter, make them implement it, assert when getting them
+        $csvWriter = new $csvWriterClass($filename, $mode);
+
+        if (! empty($head)) {
+            $csvWriter->setHead($head);
+        }
+
+        return $csvWriter;
     }
 
     public function getPrimaryKey($line)
@@ -150,7 +196,7 @@ class Raffler
         $this->setAwards($awardsArr);
     }
 
-    public function draw()
+    public function draw(&$award = null)
     {
         if (count($this->allDrawn) >= count($this->attendees)) {
             throw new AllDrawnException("Everybody has been drawn");
@@ -161,10 +207,29 @@ class Raffler
         }
 
         do {
-            $drawn = array_rand($this->attendees);
-            $key = $this->getPrimaryKey($drawn);
+            $drawn  = $this->attendees[array_rand($this->attendees)];
+            $key    = $this->getPrimaryKey($drawn);
         } while (isset($this->allDrawn[$key]));
 
+        $award = current($this->awards);
+
         return $drawn;
+    }
+
+    public function writeArrayOffToFile($array, $fname)
+    {
+        $csvReader = $this->getCsvReader($filename);
+        if (! empty($this->csvHeadConfig)) {
+            $csvReader->setHead($this->csvHeadConfig);
+        }
+
+        if ($csvReader->openFile()) {
+            $arr = $csvReader->readToArray();
+            return $arr;
+        }
+
+        throw new Exception("File ({$filename}) could not be processed!");
+
+
     }
 }
