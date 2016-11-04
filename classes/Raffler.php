@@ -4,11 +4,13 @@ namespace PhpRaffle;
 // use PhpRaffle\CsvReader;
 // use PhpRaffle\CsvWriter;
 // use PhpRaffle\AllDrawnException;
+// use PhpRaffle\NoMoreAwardsException;
 
 // TODO: Replace this with a nice PSR-4 style autoloading!!!
 require_once "CsvReader.php";
 require_once "CsvWriter.php";
 require_once "AllDrawnException.php";
+require_once "NoMoreAwardsException.php";
 
 class Raffler
 {
@@ -24,7 +26,7 @@ class Raffler
     private $winnersFilename;
     private $nowshowFilename;
 
-    public function __construct($options)
+    public function __construct($options = [])
     {
         $this->attendeesFilename    = isset($options['attendeesFilename']) ? $options['attendeesFilename'] : 'attendees.csv';
         $this->awardsFilename       = isset($options['awardsFilename']) ? $options['awardsFilename'] : 'awards.csv';
@@ -47,6 +49,41 @@ class Raffler
         $this->loadNoShow();
         $this->loadAttendees();
         $this->loadAwards();
+    }
+
+    public function setAttendees($attendees) {
+        $this->attendees = $attendees;
+    }
+
+    public function setWinners($winners) {
+        if (!empty($this->winners)) {
+            throw new Exception("Cannot set winners more than once in the object's lifetime");
+        }
+
+        $this->winners  = $winners;
+        $this->allDrawn += $winners;
+    }
+
+    public function setNoshows($noshows) {
+        if (!empty($this->nowshows)) {
+            throw new Exception("Cannot set noshows more than once in the object's lifetime");
+        }
+
+        $this->noshows  = $noshows;
+        $this->allDrawn += $noshows;
+    }
+
+    public function setAwards($awards) {
+        // If there are already as many winners as awards (or more) drawn, set awards to an empty array.
+        if (count($awards) <= count($this->winners)) {
+            $this->awards = [];
+            return;
+        }
+
+        // Load just the remaining not drawn awards
+        $awards = array_slice($awards, count($this->winners));
+
+        $this->awards = $awards;
     }
 
     private function readCsvFileToArray($filename)
@@ -110,17 +147,7 @@ class Raffler
     private function loadAwards()
     {
         $awardsArr = $this->readCsvFileToArray($this->awardsFilename);
-
-        // If there are already as many winners as awards (or more) drawn, set awards to an empty array.
-        if (count($awardsArr) <= count($this->winners)) {
-            $this->awards = [];
-            return;
-        }
-
-        // Load just the remaining not drawn awards
-        $awardsArr = array_slice($awardsArr, count($this->winners));
-
-        $this->awards = $awardsArr;
+        $this->setAwards($awardsArr);
     }
 
     public function draw()

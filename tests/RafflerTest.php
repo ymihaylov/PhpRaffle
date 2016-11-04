@@ -3,6 +3,8 @@
 require_once '../classes/Raffler.php';
 
 use PhpRaffle\Raffler;
+use PhpRaffle\AllDrawnException;
+use PhpRaffle\NoMoreAwardsException;
 
 class RafflerTest extends PHPUnit_Framework_TestCase
 {
@@ -60,5 +62,49 @@ class RafflerTest extends PHPUnit_Framework_TestCase
 
         // Otherwise. if email is set, it will be the P.K.
         $this->assertEquals($expKey, $raffler->getPrimaryKey($mockLine));
+    }
+
+    public function testAllDrawnException()
+    {
+        $this->expectException(AllDrawnException::class);
+
+        $i = 0;
+        $mockWinners = [
+            'key' . ++$i  => ['name' => 'Gosho'],
+            'key' . ++$i  => ['name' => 'Pesho'],
+            'key' . ++$i  => ['name' => 'Tosho'],
+        ];
+        $raffler = new Raffler;
+        $raffler->setWinners($mockWinners);
+        $raffler->setAttendees($mockWinners);
+
+        $raffler->draw();
+    }
+
+    public function testAllAwardsDrawnException()
+    {
+        $this->expectException(NoMoreAwardsException::class);
+
+        $i = 0;
+        $mockWinners = [
+            'key' . ++$i  => ['name' => 'Gosho'],
+            'key' . ++$i  => ['name' => 'Pesho'],
+            'key' . ++$i  => ['name' => 'Tosho'],
+        ];
+        $mockAttendees = $mockWinners + [
+            'key' . ++$i  => ['name' => 'Gancho'],
+        ];
+
+        $raffler = new Raffler;
+        $raffler->setWinners($mockWinners);
+        $raffler->setAttendees($mockAttendees);
+
+        $raffler->setAwards([
+            'panica',
+            'lazhica',
+            'tigan',
+        ]);
+
+        $raffler->draw();
     }
 }
