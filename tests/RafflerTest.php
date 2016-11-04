@@ -131,4 +131,19 @@ class RafflerTest extends PHPUnit_Framework_TestCase
         $this->assertTrue((bool) $drawn);
         $this->assertEquals($expectedAward, $award);
     }
+
+    public function testMarkDrawn()
+    {
+        $this->markTestIncomplete('This test has not been implemented yet.');
+
+        // TODO: Implement assurance that the one marked as drawn is added to winners and allDrawn, also assure
+        // persisted in file.
+    }
+
+    public function testMarkNoShow()
+    {
+        $this->markTestIncomplete('This test has not been implemented yet.');
+
+        // TODO: Implement assurance that the one marked as noShow is added to allDrawn
+    }
 }

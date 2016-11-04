@@ -1,17 +1,22 @@
 <?php
 namespace PhpRaffle;
 
-class CsvReader
+// use PhpRaffle\CsvReaderInterface;
+
+// TODO: Replace this with a nice PSR-4 style autoloading!!!
+require_once "CsvReaderInterface.php";
+
+class CsvReader implements CsvReaderInterface
 {
     private $fname;
     private $fh;
+    private $head;
 
-    public $head;
     public $delimiter    = ',';
     public $enclosure    = '"';
     public $escape       = '\\';  //a backslash - default - not used
 
-    public function __construct($fname)
+    public function __construct($fname = null)
     {
         $this->setFName($fname);
     }
