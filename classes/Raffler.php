@@ -123,7 +123,7 @@ class Raffler
 
         $csvReader = new $csvReaderClass($filename);
         if (! $csvReader instanceof CsvReaderInterface) {
-            throw new Exception('$csvReaderClass class does not implement CsvReaderInterface');
+            throw new Exception('Invalid csvReader set');
         }
 
         if (! empty($head)) {
