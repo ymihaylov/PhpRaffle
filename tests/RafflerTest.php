@@ -68,12 +68,8 @@ class RafflerTest extends PHPUnit_Framework_TestCase
     {
         $this->expectException(AllDrawnException::class);
 
-        $i = 0;
-        $mockWinners = [
-            'key' . ++$i  => ['name' => 'Gosho'],
-            'key' . ++$i  => ['name' => 'Pesho'],
-            'key' . ++$i  => ['name' => 'Tosho'],
-        ];
+        $mockWinners = $this->getThreeMockAttendees();
+
         $raffler = new Raffler;
         $raffler->setWinners($mockWinners);
         $raffler->setAttendees($mockWinners);
@@ -86,25 +82,53 @@ class RafflerTest extends PHPUnit_Framework_TestCase
         $this->expectException(NoMoreAwardsException::class);
 
         $i = 0;
-        $mockWinners = [
-            'key' . ++$i  => ['name' => 'Gosho'],
-            'key' . ++$i  => ['name' => 'Pesho'],
-            'key' . ++$i  => ['name' => 'Tosho'],
-        ];
-        $mockAttendees = $mockWinners + [
-            'key' . ++$i  => ['name' => 'Gancho'],
-        ];
+        $mockWinners    = $this->getThreeMockAttendees();
+        $mockAttendees  = $mockWinners + ['name' => 'Gancho'];
 
         $raffler = new Raffler;
         $raffler->setWinners($mockWinners);
         $raffler->setAttendees($mockAttendees);
+        $raffler->setAwards($this->getThreeMockAwards());
 
-        $raffler->setAwards([
+        $raffler->draw();
+    }
+
+    private function getThreeMockAttendees()
+    {
+        $i = 0;
+        return [
+            ['name' => 'Gosho'],
+            ['name' => 'Pesho'],
+            ['name' => 'Tosho'],
+        ];
+    }
+
+    private function getThreeMockAwards()
+    {
+        return [
             'panica',
             'lazhica',
             'tigan',
-        ]);
+        ];
+    }
 
-        $raffler->draw();
+    public function testDrawSuccess()
+    {
+        $mockAttendees  = $this->getThreeMockAttendees();
+        $mockAwards     = $this->getThreeMockAwards();
+
+        $raffler = new Raffler;
+        $raffler->setAttendees($mockAttendees);
+        $raffler->setAwards($mockAwards);
+
+        $i              = 0;
+        $expectedAward  = $mockAwards[$i];
+        $award          = null;
+
+        $drawn  = $raffler->draw($award);
+        $key    = $raffler->getPrimaryKey($drawn);
+
+        $this->assertTrue((bool) $drawn);
+        $this->assertEquals($expectedAward, $award);
     }
 }
