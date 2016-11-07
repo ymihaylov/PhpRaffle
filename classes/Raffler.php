@@ -18,7 +18,6 @@ class Raffler
     private $winners        = [];
     private $noshows        = [];
     private $awards         = [];
-    private $allDrawn       = [];
     private $csvHeadConfig  = [];
 
     private $attendeesFilename;
@@ -62,6 +61,16 @@ class Raffler
         return $this->winners;
     }
 
+    public function getNoShows()
+    {
+        return $this->nowshows;
+    }
+
+    public function getAllDrawn()
+    {
+        return $this->winners + $this->noshows;
+    }
+
     public function getAwards()
     {
         return $this->awards;
@@ -77,7 +86,6 @@ class Raffler
         }
 
         $this->winners  = $winners;
-        $this->allDrawn += $winners;
     }
 
     public function setNoshows($noshows) {
@@ -86,7 +94,6 @@ class Raffler
         }
 
         $this->noshows  = $noshows;
-        $this->allDrawn += $noshows;
     }
 
     public function setAwards($awards) {
@@ -172,21 +179,19 @@ class Raffler
 
     private function loadWinners()
     {
-        $this->winners = $this->readCsvFileToArray($this->winnersFilename);
+        $winners = $this->readCsvFileToArray($this->winnersFilename);
 
-        // Add all the drawn winners to the allDrawn array
-        foreach ($this->winners as $line) {
-            $this->allDrawn[ $this->getPrimaryKey($line) ] = $line;
+        foreach ($winners as $line) {
+            $this->winners[$this->getPrimaryKey($line)] = $line;
         }
     }
 
     private function loadNoShow()
     {
-        $this->noshows = $this->readCsvFileToArray($this->noshowFilename);
+        $noshows = $this->readCsvFileToArray($this->noshowFilename);
 
-        // Add all the no-shows to the allDrawn array
-        foreach ($this->noshows as $line) {
-            $this->allDrawn[ $this->getPrimaryKey($line) ] = $line;
+        foreach ($noshows as $line) {
+            $this->noshows[$this->getPrimaryKey($line)] = $line;
         }
     }
 
@@ -203,7 +208,8 @@ class Raffler
 
     public function draw(&$award = null)
     {
-        if (count($this->allDrawn) >= count($this->attendees)) {
+        $allDrawn = $this->getAllDrawn();
+        if (count($allDrawn) >= count($this->attendees)) {
             throw new AllDrawnException("Everybody has been drawn");
         }
 
@@ -214,7 +220,7 @@ class Raffler
         do {
             $drawn  = $this->attendees[array_rand($this->attendees)];
             $key    = $this->getPrimaryKey($drawn);
-        } while (isset($this->allDrawn[$key]));
+        } while (isset($allDrawn[$key]));
 
         $award = current($this->awards);
 
@@ -225,7 +231,6 @@ class Raffler
     {
         $winner['award']    = array_shift($this->awards);
         $this->winners[]    = $winner;
-        $this->allDrawn[]   = $winner;
 
         return $this->writeArrayOffToFile(
             $this->winners,
@@ -236,7 +241,6 @@ class Raffler
     public function markNoShow($attendee)
     {
         $this->noshows[]    = $attendee;
-        $this->allDrawn[]   = $attendee;
 
         return $this->writeArrayOffToFile(
             $this->noshows,
