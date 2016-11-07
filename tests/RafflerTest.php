@@ -134,16 +134,62 @@ class RafflerTest extends PHPUnit_Framework_TestCase
 
     public function testMarkDrawn()
     {
-        $this->markTestIncomplete('This test has not been implemented yet.');
+        $raffler = $this->getMockBuilder('\PhpRaffle\Raffler')
+            // ->setConstructorArgs()
+            ->setMethods(['writeArrayOffToFile'])
+            ->getMock();
 
-        // TODO: Implement assurance that the one marked as drawn is added to winners and allDrawn, also assure
-        // persisted in file.
+        // $raffler->expects($this->extract(3))
+        $raffler->expects($this->any())
+            ->method('writeArrayOffToFile')
+            ->will($this->returnValue(true));
+
+        $attendees  = $this->getThreeMockAttendees();
+        $awards     = $this->getThreeMockAwards();
+        $raffler->setAttendees($attendees);
+        $raffler->setAwards($awards);
+
+        for ($i = 0; $i < 3; $i++) {
+            $award = null;
+            $drawn = $raffler->draw($award);
+
+            $this->assertTrue(isset($drawn['name']));
+            $this->assertEquals($awards[$i], $award);
+
+            $this->assertTrue($raffler->markDrawn($drawn));
+            $this->assertEquals(2 - $i, count($raffler->getAwards()));
+        }
+
+        $this->assertEquals($i, count($raffler->getWinners()));
     }
 
     public function testMarkNoShow()
     {
-        $this->markTestIncomplete('This test has not been implemented yet.');
+         $raffler = $this->getMockBuilder('\PhpRaffle\Raffler')
+            // ->setConstructorArgs()
+            ->setMethods(['writeArrayOffToFile'])
+            ->getMock();
 
-        // TODO: Implement assurance that the one marked as noShow is added to allDrawn
+        // $raffler->expects($this->extract(3))
+        $raffler->expects($this->any())
+            ->method('writeArrayOffToFile')
+            ->will($this->returnValue(true));
+
+        $attendees  = $this->getThreeMockAttendees();
+        $awards     = $this->getThreeMockAwards();
+        $raffler->setAttendees($attendees);
+        $raffler->setAwards($awards);
+
+        for ($i = 0; $i < 3; $i++) {
+            $award = null;
+            $drawn = $raffler->draw($award);
+
+            $this->assertTrue(isset($drawn['name']));
+            $this->assertEquals($awards[0], $award);
+
+            $this->assertTrue($raffler->markNoShow($drawn));
+            $this->assertEquals(0, count($raffler->getWinners()));
+            $this->assertEquals(3, count($raffler->getAwards()));
+        }
     }
 }

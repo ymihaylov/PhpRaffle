@@ -24,7 +24,7 @@ class Raffler
     private $attendeesFilename;
     private $awardsFilename;
     private $winnersFilename;
-    private $nowshowFilename;
+    private $noshowFilename;
 
     private $csvReader;
     private $csvWriter;
@@ -34,7 +34,7 @@ class Raffler
         $this->attendeesFilename    = isset($options['attendeesFilename']) ? $options['attendeesFilename'] : 'attendees.csv';
         $this->awardsFilename       = isset($options['awardsFilename']) ? $options['awardsFilename'] : 'awards.csv';
         $this->winnersFilename      = isset($options['winnersFilename']) ? $options['winnersFilename'] : 'winners.csv';
-        $this->nowshowFilename      = isset($options['noshowFilename']) ? $options['noshowFilename'] : 'noshow.csv';
+        $this->noshowFilename      = isset($options['noshowFilename']) ? $options['noshowFilename'] : 'noshow.csv';
         $this->csvHeadConfig        = isset($options['csvHead'])
             ? $options['csvHead']
             : [
@@ -60,6 +60,11 @@ class Raffler
     public function getWinners()
     {
         return $this->winners;
+    }
+
+    public function getAwards()
+    {
+        return $this->awards;
     }
 
     public function setAttendees($attendees) {
@@ -216,7 +221,30 @@ class Raffler
         return $drawn;
     }
 
-    public function writeArrayOffToFile($array, $fname)
+    public function markDrawn($winner)
+    {
+        $winner['award']    = array_shift($this->awards);
+        $this->winners[]    = $winner;
+        $this->allDrawn[]   = $winner;
+
+        return $this->writeArrayOffToFile(
+            $this->winners,
+            $this->winnersFilename
+        );
+    }
+
+    public function markNoShow($attendee)
+    {
+        $this->noshows[]    = $attendee;
+        $this->allDrawn[]   = $attendee;
+
+        return $this->writeArrayOffToFile(
+            $this->noshows,
+            $this->noshowFilename
+        );
+    }
+
+    public function writeArrayOffToFile($array, $filename)
     {
         $csvReader = $this->getCsvReader($filename);
         if (! empty($this->csvHeadConfig)) {
@@ -229,7 +257,5 @@ class Raffler
         }
 
         throw new Exception("File ({$filename}) could not be processed!");
-
-
     }
 }
