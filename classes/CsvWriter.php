@@ -1,10 +1,7 @@
 <?php
 namespace PhpRaffle;
 
-// use PhpRaffle\CsvWriterInterface;
-
-// TODO: Replace this with a nice PSR-4 style autoloading!!!
-require_once "CsvWriterInterface.php";
+use PhpRaffle\CsvWriterInterface;
 
 class CsvWriter implements CsvWriterInterface
 {

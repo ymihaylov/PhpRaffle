@@ -1,10 +1,7 @@
 <?php
 namespace PhpRaffle;
 
-// use PhpRaffle\CsvReaderInterface;
-
-// TODO: Replace this with a nice PSR-4 style autoloading!!!
-require_once "CsvReaderInterface.php";
+use PhpRaffle\CsvReaderInterface;
 
 class CsvReader implements CsvReaderInterface
 {

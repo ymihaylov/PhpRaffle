@@ -1,16 +1,10 @@
 <?php
 namespace PhpRaffle;
 
-// use PhpRaffle\CsvReader;
-// use PhpRaffle\CsvWriter;
-// use PhpRaffle\AllDrawnException;
-// use PhpRaffle\NoMoreAwardsException;
-
-// TODO: Replace this with a nice PSR-4 style autoloading!!!
-require_once "CsvReader.php";
-require_once "CsvWriter.php";
-require_once "AllDrawnException.php";
-require_once "NoMoreAwardsException.php";
+use PhpRaffle\CsvReader;
+use PhpRaffle\CsvWriter;
+use PhpRaffle\AllDrawnException;
+use PhpRaffle\NoMoreAwardsException;
 
 class Raffler
 {

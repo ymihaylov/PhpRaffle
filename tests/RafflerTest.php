@@ -1,7 +1,4 @@
 <?php
-// TODO: Replace this with a nice PSR-4 style autoloading!!!
-require_once '../classes/Raffler.php';
-
 use PhpRaffle\Raffler;
 use PhpRaffle\AllDrawnException;
 use PhpRaffle\NoMoreAwardsException;
