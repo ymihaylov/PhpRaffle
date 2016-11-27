@@ -27,7 +27,7 @@ class Raffler
         $this->attendeesFilename    = isset($options['attendeesFilename']) ? $options['attendeesFilename'] : 'attendees.csv';
         $this->awardsFilename       = isset($options['awardsFilename']) ? $options['awardsFilename'] : 'awards.csv';
         $this->winnersFilename      = isset($options['winnersFilename']) ? $options['winnersFilename'] : 'winners.csv';
-        $this->noshowFilename      = isset($options['noshowFilename']) ? $options['noshowFilename'] : 'noshow.csv';
+        $this->noshowFilename       = isset($options['noshowFilename']) ? $options['noshowFilename'] : 'noshow.csv';
         $this->csvHeadConfig        = isset($options['csvHead'])
             ? $options['csvHead']
             : [
@@ -255,5 +255,31 @@ class Raffler
         }
 
         throw new Exception("File ({$filename}) could not be processed!");
+    }
+
+    public function getRandomAttendees($number)
+    {
+        if ($number <= 0) {
+            throw new GenericException("Zero or negative number passed to " . __METHOD__);
+        }
+
+        if ($number >= count($this->attendees)) {
+            return $this->attendees;
+        }
+
+        $drawnIds           = [];
+        $randomAttendees    = [];
+
+        while (count($randomAttendees) < $number) {
+            $randId         = array_rand($this->attendees);
+            $randomAttendee = $this->attendees[$randId];
+
+            if (! isset($drawnIds[$randId])) {
+                $randomAttendees[] = $randomAttendee;
+                $drawnIds[$randId] = true;
+            }
+        }
+
+        return $randomAttendees;
     }
 }

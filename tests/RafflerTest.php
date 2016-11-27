@@ -189,4 +189,22 @@ class RafflerTest extends PHPUnit_Framework_TestCase
             $this->assertEquals(3, count($raffler->getAwards()));
         }
     }
+
+    public function test_getRandomAttendees_success()
+    {
+        $attendees  = $this->getThreeMockAttendees();
+
+        $raffler = new Raffler;
+        $raffler->setAttendees($attendees);
+
+        // Test regular case - get 2 random attendees out of 3
+        $randomAttendees = $raffler->getRandomAttendees(2);
+
+        $this->assertEquals(2, count($randomAttendees));
+
+        // Test trying to get more than the max (3) attendees, expecting to get all of them without problem
+        $randomAttendees = $raffler->getRandomAttendees(100);
+
+        $this->assertEquals(3, count($randomAttendees));
+    }
 }
