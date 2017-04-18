@@ -76,7 +76,7 @@ class Raffler
 
     public function setWinners($winners) {
         if (!empty($this->winners)) {
-            throw new Exception("Cannot set winners more than once in the object's lifetime");
+            throw new GenericException("Cannot set winners more than once in the object's lifetime");
         }
 
         $this->winners  = $winners;
@@ -84,7 +84,7 @@ class Raffler
 
     public function setNoshows($noshows) {
         if (!empty($this->nowshows)) {
-            throw new Exception("Cannot set noshows more than once in the object's lifetime");
+            throw new GenericException("Cannot set noshows more than once in the object's lifetime");
         }
 
         $this->noshows  = $noshows;
@@ -106,7 +106,7 @@ class Raffler
     private function readCsvFileToArray($filename)
     {
         if (!is_readable($filename)) {
-            throw new Exception("File ({$filename}) not readible!");
+            throw new GenericException("File ({$filename}) not readible!");
         }
 
         $csvReader = $this->getCsvReader($filename, $this->csvHeadConfig);
@@ -116,7 +116,13 @@ class Raffler
             return $arr;
         }
 
-        throw new Exception("File ({$filename}) could not be processed!");
+        throw new GenericException("File ({$filename}) could not be processed!");
+    }
+
+    private function initEmptyFile($filename) {
+        if (!touch($filename)) {
+            throw new GenericException("Error creating file $filename");
+        }
     }
 
     private function getCsvReader($filename, $head = null)
@@ -124,12 +130,12 @@ class Raffler
         $csvReaderClass = get_class($this->csvReader);
         if (! $csvReaderClass) {
             // TODO: Create a generic base for PhpRaffler exceptions, make NoMore and AllDRawn extend from it
-            throw new Exception('No proper csvReader set');
+            throw new GenericException('No proper csvReader set');
         }
 
         $csvReader = new $csvReaderClass($filename);
         if (! $csvReader instanceof CsvReaderInterface) {
-            throw new Exception('Invalid csvReader set');
+            throw new GenericException('Invalid csvReader set');
         }
 
         if (! empty($head)) {
@@ -144,7 +150,7 @@ class Raffler
         $csvWriterClass = get_class($this->csvWriter);
         if (! $csvWriterClass) {
             // TODO: Create a generic base for PhpRaffler exceptions, make NoMore and AllDRawn extend from it
-            throw new Exception('No proper csvWriter set');
+            throw new GenericException('No proper csvWriter set');
         }
 
         // TODO: Create an interface for csvReader and csvWriter, make them implement it, assert when getting them
@@ -173,6 +179,10 @@ class Raffler
 
     private function loadWinners()
     {
+        if (!file_exists($this->winnersFilename)) {
+            $this->initEmptyFile($this->winnersFilename);
+        }
+
         $winners = $this->readCsvFileToArray($this->winnersFilename);
 
         foreach ($winners as $line) {
@@ -182,6 +192,10 @@ class Raffler
 
     private function loadNoShow()
     {
+        if (!file_exists($this->noshowFilename)) {
+            $this->initEmptyFile($this->noshowFilename);
+        }
+
         $noshows = $this->readCsvFileToArray($this->noshowFilename);
 
         foreach ($noshows as $line) {
@@ -244,27 +258,25 @@ class Raffler
 
     public function writeArrayOffToFile($array, $filename)
     {
-        $csvReader = $this->getCsvReader($filename);
-        if (! empty($this->csvHeadConfig)) {
-            $csvReader->setHead($this->csvHeadConfig);
+        $csvWriter = $this->getCsvWriter($filename);
+
+        if (! $csvWriter->openFile()) {
+           throw new GenericException("File ({$filename}) could not be opened for writing!");
         }
 
-        if ($csvReader->openFile()) {
-            $arr = $csvReader->readToArray();
-            return $arr;
-        }
-
-        throw new Exception("File ({$filename}) could not be processed!");
+        return $csvWriter->writeFromArray($array);
     }
 
-    public function getRandomAttendees($number)
+    public function getRandomAttendees($number, $obfuscateEmail = true)
     {
         if ($number <= 0) {
             throw new GenericException("Zero or negative number passed to " . __METHOD__);
         }
 
         if ($number >= count($this->attendees)) {
-            return $this->attendees;
+            return $obfuscateEmail
+                ? $this->obfuscateAttendeesEmailAddresses($this->attendees)
+                : $this->attendees;
         }
 
         $drawnIds           = [];
@@ -280,6 +292,27 @@ class Raffler
             }
         }
 
-        return $randomAttendees;
+        return $obfuscateEmail
+                ? $this->obfuscateAttendeesEmailAddresses($randomAttendees)
+                : $randomAttendees;
+    }
+
+    public function obfuscateAttendeesEmailAddresses($attendees)
+    {
+        foreach ($attendees as &$attendee) {
+            if (isset($attendee['Email'])) {
+                $attendee['Email'] = $this->obfuscateEmailAddress($attendee['Email']);
+            }
+        }
+
+        return $attendees;
+    }
+
+    public function obfuscateEmailAddress($email)
+    {
+        $parts = explode('@', $email);
+        $parts[0] = str_pad(substr($parts[0], 0, 1), strlen($parts[0]) - 2, '*') . substr($parts[0], -1);
+
+        return $parts[0] . '@' . $parts[1];
     }
 }

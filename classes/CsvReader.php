@@ -37,7 +37,7 @@ class CsvReader implements CsvReaderInterface
         $arr = array();
         $i = 0;
         while ($linearr = $this->readLine()) {
-            $arr[ $i++ ] = $linearr;
+            $arr[$i++] = $linearr;
         }
 
         $this->closeFile();
@@ -52,8 +52,8 @@ class CsvReader implements CsvReaderInterface
             //replace numeric indices with ones from head, if any
 
             foreach ($linearr as $key => $value) {
-                $linearr[ $this->head[ $key ] ] = $value;
-                unset($linearr[ $key ]);
+                $linearr[$this->head[$key]] = $value;
+                unset($linearr[$key]);
             }
         }
 
@@ -62,7 +62,8 @@ class CsvReader implements CsvReaderInterface
 
     public function openFile()
     {
-        return ($this->fh = fopen($this->fname, 'r')) ? true : false;
+        $this->fh = fopen($this->fname, 'r');
+        return (bool) $this->fh;
     }
 
     public function closeFile()
