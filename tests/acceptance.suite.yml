@@ -7,6 +7,12 @@
 class_name: AcceptanceTester
 modules:
     enabled:
-        - PhpBrowser:
-            url: http://localhost/myapp
+        - WebDriver:
+            url: http://localhost/PhpRaffle
+            browser: phantomjs
+            window_size: 1024x750
+            compatiblities:
+              webStorageEnabled: true
+        # - PhpBrowser:
+            # url: http://localhost/PhpRaffle
         - \Helper\Acceptance
