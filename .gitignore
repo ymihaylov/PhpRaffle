@@ -1,2 +1,4 @@
 vendor
 csvFiles/*
+
+tests/_output/*
