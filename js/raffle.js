@@ -13,7 +13,7 @@ var Raffle = {
   contestants: new Array('One', 'Two', 'Three', 'Four'),
   winner: null,
   djurking: false,
-    
+
   setup: function() {
     $('#chooseit').live('click', Raffle.on_choose);
     $.ajax({
@@ -32,9 +32,9 @@ var Raffle = {
           Raffle.contestants = data;
         }
       }
-    });    
+    });
   },
-  
+
   on_choose: function() {
     Raffle.insert_previous_winner_into_list();
     $('#chooser, #chooseit').hide();
@@ -44,12 +44,12 @@ var Raffle = {
     Raffle.djurking = true;
     $('#chooser').fadeIn();
     Raffle.shuffle();
-    
+
     setTimeout('Raffle.pick_winner()', 3000);
 
     return false;
   },
-  
+
   shuffle: function() {
     if ( Raffle.djurking )
     {
@@ -77,20 +77,20 @@ var Raffle = {
         }
         else
         {
-          Raffle.winner = data;
+          Raffle.winner = data.winner;
           Raffle.display_winner();
         }
       }
     });
-    
+
   },
-  
+
   insert_previous_winner_into_list: function() {
     if(Raffle.winner) {
-      $('#winners ol').append("<li>" + Raffle.winner.name + "</li>");
+      $('#winners ol').append("<li>" + Raffle.winner.Name + "</li>");
     }
   },
-  
+
   display_winner: function() {
     if ( typeof( Raffle.winner.award ) != 'undefined' )
     {
@@ -102,7 +102,7 @@ var Raffle = {
       $('#chooser h1').html(winner);
     }
     else
-      $('#chooser h1').html(Raffle.winner.name + "!");
+      $('#chooser h1').html(Raffle.winner.Name + "!");
 
     $('#chooseit span').html("Let's see who's next!");
     $('#chooseit').show();
