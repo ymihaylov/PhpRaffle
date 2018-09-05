@@ -15,7 +15,7 @@ var Raffle = {
   djurking: false,
 
   setup: function() {
-    $('#chooseit').live('click', Raffle.on_choose);
+    $('#chooseit').on('click', Raffle.on_choose);
     $.ajax({
       url: 'raffle.php',
       method: 'GET',
@@ -108,6 +108,4 @@ var Raffle = {
     $('#chooseit').show();
     $('#chooser').fadeIn();
   }
-
-
 };
