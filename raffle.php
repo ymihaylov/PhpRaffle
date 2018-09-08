@@ -4,8 +4,8 @@ require_once "autoload.php";
 use PhpRaffle\Raffler;
 
 $options = [
-    'attendeesFilename'     => 'oct_meeting_attendees.csv',
-    'csvHead'               => ['Email','Name'],
+    'attendeesFilename'     => 'september_laravel_jetbrains_contestants.csv',
+    'csvHead'               => ['Signed At','Name', 'Profile Link'],
 ];
 
 $raffler = new Raffler($options);
@@ -19,6 +19,7 @@ if (isset($_GET['getRandom']))
 {
     $number = (int) $_GET['getRandom'];
     $randomAttendees = $raffler->getRandomAttendees($number);
+
     echo json_encode($randomAttendees);
     exit;
 }
@@ -41,10 +42,7 @@ if (isset($_POST['noshow']))
     exit;
 }
 
-
 $award  = null;
 $winner = $raffler->draw($award);
 echo json_encode(['winner' => $winner, 'award' => $award]);
 exit;
-
-
