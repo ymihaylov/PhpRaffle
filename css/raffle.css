@@ -102,6 +102,10 @@ header h1 em {
   margin-bottom: 30px;
 }
 
+#chooser h1.winner-text {
+  text-shadow: #AA0D0D 5px 2px 20px;
+}
+
 button#chooseit {
     text-transform: uppercase;
     display: inline-block;
