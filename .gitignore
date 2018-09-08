@@ -1,4 +1,4 @@
 vendor
 csvFiles/*
-
+.idea
 tests/_output/*
