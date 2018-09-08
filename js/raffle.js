@@ -2,15 +2,15 @@ $(document).ready(function() {
   Raffle.setup();
 
   $('body').keyup(function(e){
-   if(e.keyCode == 32){
-       // user has pressed space
-       Raffle.on_choose();
-   }
-});
+      if(e.keyCode == 32){
+        // user has pressed Space!
+        Raffle.on_choose();
+      }
+  });
 });
 
 var Raffle = {
-  contestants: new Array('One', 'Two', 'Three', 'Four'),
+  contestants: new Array(),
   winner: null,
   djurking: false,
 
@@ -38,14 +38,14 @@ var Raffle = {
   on_choose: function() {
     Raffle.insert_previous_winner_into_list();
     $('#chooser, #chooseit').hide();
+    $('#chooser h1').removeClass('winner-text');
     $('#chooser h1').html("Computing.....");
-    // TODO: Show randomly drawn names every 0.3 sec?
 
     Raffle.djurking = true;
-    $('#chooser').fadeIn();
+    $('#chooser').fadeIn(500);
     Raffle.shuffle();
 
-    setTimeout('Raffle.pick_winner()', 3000);
+    setTimeout('Raffle.pick_winner()', 1500);
 
     return false;
   },
@@ -53,17 +53,20 @@ var Raffle = {
   shuffle: function() {
     if ( Raffle.djurking )
     {
-      var randomnumber = Math.floor(Math.random()*Raffle.contestants.length);
-      $("#chooser h1").html( Raffle.contestants[ randomnumber ] );
-      setTimeout( 'Raffle.shuffle();', 200 );
+      var randomNumber = Math.floor(Math.random() * Raffle.contestants.length),
+          displayNameOnShuffle = 'Shuffling...';
+
+      if (Raffle.contestants[randomNumber]['Name'] !== undefined) {
+        displayNameOnShuffle = Raffle.contestants[randomNumber]['Name'];
+      }
+
+      $("#chooser h1").html(displayNameOnShuffle);
+      setTimeout('Raffle.shuffle();', 150);
     }
   },
 
   pick_winner: function() {
     Raffle.djurking = false;
-    $('#chooser').hide();
-    // var randomnumber = Math.floor(Math.random()*Raffle.contestants.length);
-    // Raffle.winner = Raffle.contestants.splice(randomnumber,1);
 
     $.ajax({
       url: 'raffle.php',
@@ -82,7 +85,6 @@ var Raffle = {
         }
       }
     });
-
   },
 
   insert_previous_winner_into_list: function() {
@@ -95,14 +97,15 @@ var Raffle = {
     if ( typeof( Raffle.winner.award ) != 'undefined' )
     {
       var winner = Raffle.winner.name;
-      // if ( Raffle.winner.email )
-        // winner = winner + "<br/>(" + Raffle.winner.email + ")";
-
       winner = winner + "<br/><em>" + Raffle.winner.award + "</em>";
+
       $('#chooser h1').html(winner);
+      $('#chooser h1').addClass('winner-text');
     }
-    else
+    else {
       $('#chooser h1').html(Raffle.winner.Name + "!");
+      $('#chooser h1').addClass('winner-text');
+    }
 
     $('#chooseit span').html("Let's see who's next!");
     $('#chooseit').show();
